@@ -27,6 +27,9 @@ packages
 cconfig.h
 GPUCache
 
+#source insight
+/si
+
 #cscope files
 cscope.*
 ncscope.*
