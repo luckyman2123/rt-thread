@@ -56,6 +56,7 @@ elif rtconfig.PLATFORM == 'mingw':
         odbccp32
         ''')
     TARGET = 'rtthread-win32.' + rtconfig.TARGET_EXT
+    DefaultEnvironment(tools=[])
     env = Environment(tools = ['mingw'],
         AS = rtconfig.AS, ASFLAGS = rtconfig.AFLAGS,
         CC = rtconfig.CC, CCFLAGS = rtconfig.CFLAGS,
@@ -85,6 +86,19 @@ def ObjRemove(objs, remove):
              objs.remove(item)
     return
 
+def ProjectRemove(group, remove):
+    global Projects
+    for item in Projects:
+        if item['name'] == group:
+            for src in item['src']:
+                if os.path.basename(str(src)) in remove:
+                    # print(type(src), os.path.basename(str(src)) )
+                    item['src'].remove(src)
+    return
+
+ObjRemove(objs, ['components.obj', 'components.o', 'components.c'])
+ProjectRemove('Kernel', ['components.obj', 'components.o', 'components.c'])
+
 # build program  -shared
 if GetDepend('RT_USING_MODULE'):
     # Remove module.c in $RTT_ROOT/src
@@ -94,7 +108,7 @@ if GetDepend('RT_USING_MODULE'):
       dest='def',
       action='store_true',
       default=False,
-      help='create rthread.def of rtthread.dll on windows')
+      help='create rtthread.def of rtthread.dll on windows')
     if GetOption('def'):
         if rtconfig.PLATFORM == 'mingw':
             env['LINKFLAGS'] = rtconfig.DEFFILE_LFLAGS

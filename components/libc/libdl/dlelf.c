@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -172,7 +172,7 @@ rt_err_t dlmodule_load_shared_object(struct rt_dlmodule* module, void *module_pt
             rel ++;
         }
 
-        if (unsolved) 
+        if (unsolved)
             return -RT_ERROR;
     }
 
@@ -225,6 +225,40 @@ rt_err_t dlmodule_load_shared_object(struct rt_dlmodule* module, void *module_pt
                       strtab + symtab[i].st_name,
                       length);
             count ++;
+        }
+
+        /* get priority & stack size params*/
+        rt_uint32_t flag = 0;
+        rt_uint16_t priority;
+        rt_uint32_t stacksize;
+        for (i = 0; i < shdr[index].sh_size / sizeof(Elf32_Sym); i++)
+        {
+            if (((flag & 0x01) == 0) &&
+                (rt_strcmp((const char *)(strtab + symtab[i].st_name), "dlmodule_thread_priority") == 0))
+            {
+                flag |= 0x01;
+                priority = *(rt_uint16_t*)(module->mem_space + symtab[i].st_value - module->vstart_addr);
+                if (priority < RT_THREAD_PRIORITY_MAX)
+                {
+                    module->priority = priority;
+                }
+            }
+
+            if (((flag & 0x02) == 0) &&
+                (rt_strcmp((const char *)(strtab + symtab[i].st_name), "dlmodule_thread_stacksize") == 0))
+            {
+                flag |= 0x02;
+                stacksize = *(rt_uint32_t*)(module->mem_space + symtab[i].st_value - module->vstart_addr);
+                if ((stacksize < 2048) || (stacksize > 1024 * 32))
+                {
+                    module->stack_size = stacksize;
+                }
+            }
+
+            if ((flag & 0x03) == 0x03)
+            {
+                break;
+            }
         }
     }
 
@@ -301,7 +335,7 @@ rt_err_t dlmodule_load_relocated_object(struct rt_dlmodule* module, void *module
                       (rt_uint8_t *)elf_module + shdr[index].sh_offset,
                       shdr[index].sh_size);
             rodata_addr = (rt_uint32_t)ptr;
-            LOG_D("load rodata 0x%x, size %d, rodata 0x%x", ptr, 
+            LOG_D("load rodata 0x%x, size %d, rodata 0x%x", ptr,
                 shdr[index].sh_size, *(rt_uint32_t *)data_addr);
             ptr += shdr[index].sh_size;
         }
@@ -313,7 +347,7 @@ rt_err_t dlmodule_load_relocated_object(struct rt_dlmodule* module, void *module
                       (rt_uint8_t *)elf_module + shdr[index].sh_offset,
                       shdr[index].sh_size);
             data_addr = (rt_uint32_t)ptr;
-            LOG_D("load data 0x%x, size %d, data 0x%x", ptr, 
+            LOG_D("load data 0x%x, size %d, data 0x%x", ptr,
                 shdr[index].sh_size, *(rt_uint32_t *)data_addr);
             ptr += shdr[index].sh_size;
         }
@@ -362,7 +396,7 @@ rt_err_t dlmodule_load_relocated_object(struct rt_dlmodule* module, void *module
             if (sym->st_shndx != STN_UNDEF)
             {
                 Elf32_Addr addr = 0;
-                
+
                 if ((ELF_ST_TYPE(sym->st_info) == STT_SECTION) ||
                     (ELF_ST_TYPE(sym->st_info) == STT_OBJECT))
                 {

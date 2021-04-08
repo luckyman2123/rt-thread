@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -13,6 +13,8 @@
 
 #include <dfs_poll.h>
 #include <dfs_select.h>
+
+#ifdef RT_USING_POSIX
 
 static void fdszero(fd_set *set, int nfds)
 {
@@ -178,3 +180,4 @@ int select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struc
     return ret;
 }
 
+#endif

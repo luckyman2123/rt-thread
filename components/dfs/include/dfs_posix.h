@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -58,6 +58,7 @@ int fstat(int fildes, struct stat *buf);
 int fsync(int fildes);
 int fcntl(int fildes, int cmd, ...);
 int ioctl(int fildes, int cmd, ...);
+int ftruncate(int fd, off_t length);
 
 /* directory api*/
 int rmdir(const char *path);

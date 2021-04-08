@@ -16,7 +16,7 @@ except:
     exit(-1)
 
 TARGET = 'rtthread.' + rtconfig.TARGET_EXT
-
+DefaultEnvironment(tools=[])
 if rtconfig.PLATFORM == 'armcc':
     env = Environment(tools = ['mingw'],
         AS = rtconfig.AS, ASFLAGS = rtconfig.AFLAGS,
@@ -47,10 +47,10 @@ Export('rtconfig')
 
 SDK_ROOT = os.path.abspath('./')
 
-if os.path.exists(SDK_ROOT + '/Libraries'):
-    libraries_path_prefix = SDK_ROOT + '/Libraries'
+if os.path.exists(SDK_ROOT + '/libraries'):
+    libraries_path_prefix = SDK_ROOT + '/libraries'
 else:
-    libraries_path_prefix = os.path.dirname(SDK_ROOT) + '/Libraries'
+    libraries_path_prefix = os.path.dirname(SDK_ROOT) + '/libraries'
 
 SDK_LIB = libraries_path_prefix
 Export('SDK_LIB')
@@ -66,6 +66,9 @@ objs.extend(SConscript(os.path.join(libraries_path_prefix, imxrt_library, 'SCons
 
 # include drivers
 objs.extend(SConscript(os.path.join(libraries_path_prefix, 'drivers', 'SConscript')))
+
+# include peripherals
+objs.extend(SConscript(os.path.join(libraries_path_prefix, 'peripherals', 'SConscript')))
 
 # make a building
 DoBuilding(TARGET, objs)

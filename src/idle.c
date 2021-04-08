@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -51,11 +51,11 @@ ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t rt_thread_stack[_CPUS_NR][IDLE_THREAD_STACK_SIZE];
 
 #ifdef RT_USING_IDLE_HOOK
-#ifndef RT_IDEL_HOOK_LIST_SIZE
-#define RT_IDEL_HOOK_LIST_SIZE  4
+#ifndef RT_IDLE_HOOK_LIST_SIZE
+#define RT_IDLE_HOOK_LIST_SIZE  4
 #endif
 
-static void (*idle_hook_list[RT_IDEL_HOOK_LIST_SIZE])(void);
+static void (*idle_hook_list[RT_IDLE_HOOK_LIST_SIZE])(void);
 
 /**
  * @ingroup Hook
@@ -78,7 +78,7 @@ rt_err_t rt_thread_idle_sethook(void (*hook)(void))
     /* disable interrupt */
     level = rt_hw_interrupt_disable();
 
-    for (i = 0; i < RT_IDEL_HOOK_LIST_SIZE; i++)
+    for (i = 0; i < RT_IDLE_HOOK_LIST_SIZE; i++)
     {
         if (idle_hook_list[i] == RT_NULL)
         {
@@ -110,7 +110,7 @@ rt_err_t rt_thread_idle_delhook(void (*hook)(void))
     /* disable interrupt */
     level = rt_hw_interrupt_disable();
 
-    for (i = 0; i < RT_IDEL_HOOK_LIST_SIZE; i++)
+    for (i = 0; i < RT_IDLE_HOOK_LIST_SIZE; i++)
     {
         if (idle_hook_list[i] == hook)
         {
@@ -150,82 +150,37 @@ void rt_thread_idle_excute(void)
 {
     /* Loop until there is no dead thread. So one call to rt_thread_idle_excute
      * will do all the cleanups. */
-    while (_has_defunct_thread())
+    /* disable interrupt */
+
+    RT_DEBUG_NOT_IN_INTERRUPT;
+
+#ifdef RT_USING_HEAP
+    while (1)
     {
         rt_base_t lock;
         rt_thread_t thread;
-#ifdef RT_USING_MODULE
-        struct rt_dlmodule *module = RT_NULL;
-#endif
-        RT_DEBUG_NOT_IN_INTERRUPT;
 
-        /* disable interrupt */
         lock = rt_hw_interrupt_disable();
 
-        /* re-check whether list is empty */
-        if (_has_defunct_thread())
+        /* check whether list is empty */
+        if (!_has_defunct_thread())
         {
-            /* get defunct thread */
-            thread = rt_list_entry(rt_thread_defunct.next,
-                                   struct rt_thread,
-                                   tlist);
-#ifdef RT_USING_MODULE
-            module = (struct rt_dlmodule*)thread->module_id;
-            if (module)
-            {
-                dlmodule_destroy(module);
-            }
-#endif
-            /* remove defunct thread */
-            rt_list_remove(&(thread->tlist));
-
-            /* lock scheduler to prevent scheduling in cleanup function. */
-            rt_enter_critical();
-
-            /* invoke thread cleanup */
-            if (thread->cleanup != RT_NULL)
-                thread->cleanup(thread);
-
-#ifdef RT_USING_SIGNALS
-            rt_thread_free_sig(thread);
-#endif
-
-            /* if it's a system object, not delete it */
-            if (rt_object_is_systemobject((rt_object_t)thread) == RT_TRUE)
-            {
-                /* detach this object */
-                rt_object_detach((rt_object_t)thread);
-                /* unlock scheduler */
-                rt_exit_critical();
-
-                /* enable interrupt */
-                rt_hw_interrupt_enable(lock);
-
-                return;
-            }
-
-            /* unlock scheduler */
-            rt_exit_critical();
-        }
-        else
-        {
-            /* enable interrupt */
             rt_hw_interrupt_enable(lock);
-
-            /* may the defunct thread list is removed by others, just return */
-            return;
+            break;
         }
-
-        /* enable interrupt */
-        rt_hw_interrupt_enable(lock);
-
-#ifdef RT_USING_HEAP
+        /* get defunct thread */
+        thread = rt_list_entry(rt_thread_defunct.next,
+                struct rt_thread,
+                tlist);
+        /* remove defunct thread */
+        rt_list_remove(&(thread->tlist));
         /* release thread's stack */
         RT_KERNEL_FREE(thread->stack_addr);
         /* delete thread object */
         rt_object_delete((rt_object_t)thread);
-#endif
+        rt_hw_interrupt_enable(lock);
     }
+#endif
 }
 
 extern void rt_system_power_manager(void);
@@ -246,7 +201,7 @@ static void rt_thread_idle_entry(void *parameter)
 #ifdef RT_USING_IDLE_HOOK
         rt_size_t i;
 
-        for (i = 0; i < RT_IDEL_HOOK_LIST_SIZE; i++)
+        for (i = 0; i < RT_IDLE_HOOK_LIST_SIZE; i++)
         {
             if (idle_hook_list[i] != RT_NULL)
             {
@@ -256,7 +211,7 @@ static void rt_thread_idle_entry(void *parameter)
 #endif
 
         rt_thread_idle_excute();
-#ifdef RT_USING_PM        
+#ifdef RT_USING_PM
         rt_system_power_manager();
 #endif
     }

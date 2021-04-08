@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -68,7 +68,7 @@ public:
 private:
     struct rt_messagequeue mID;
 
-    char mPool[(sizeof(struct rt_messagequeue) + sizeof(T)) * queue_sz];
+    char mPool[(sizeof(void *) + RT_ALIGN(sizeof(T), RT_ALIGN_SIZE)) * queue_sz];
 };
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -23,6 +23,11 @@
 int rt_hw_cpu_id(void)
 {
     return read_csr(mhartid);
+}
+
+void rt_hw_spin_lock_init(rt_hw_spinlock_t *lock)
+{
+    ((spinlock_t *)lock)->lock = 0;
 }
 
 void rt_hw_spin_lock(rt_hw_spinlock_t *lock)
