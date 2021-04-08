@@ -20,7 +20,7 @@ config RT_USING_ARCH_DATA_TYPE
 config RT_USING_SMP
     bool "Enable SMP(Symmetric multiprocessing)"
     default n
-	help
+    help
         This option should be selected by machines which have an SMP-
         capable CPU.
         The only effect of this option is to make the SMP-related
@@ -28,10 +28,10 @@ config RT_USING_SMP
 
 config RT_CPUS_NR
     int "Number of CPUs"
-	default 2
-	depends on RT_USING_SMP
+    default 2
+    depends on RT_USING_SMP
     help
-		Number of CPUs in the system
+        Number of CPUs in the system
 
 config RT_ALIGN_SIZE
     int "Alignment size for CPU architecture data access"
@@ -86,8 +86,8 @@ config RT_USING_IDLE_HOOK
     default y if RT_USING_HOOK
 
     if RT_USING_IDLE_HOOK
-    config RT_IDEL_HOOK_LIST_SIZE
-        int "The max size of idel hook list"
+    config RT_IDLE_HOOK_LIST_SIZE
+        int "The max size of idle hook list"
         default 4
         range 1 16
         help
@@ -115,6 +115,10 @@ config RT_TIMER_THREAD_STACK_SIZE
     default 512
 
 endif
+
+config RT_KSERVICE_USING_STDLIB
+    bool "Enable kservice to use standard C library"
+    default n
 
 menuconfig RT_DEBUG
     bool "Enable debugging features"
@@ -270,23 +274,33 @@ menu "Memory Management"
         config RT_USING_MEMHEAP_AS_HEAP
             bool "Use all of memheap objects as heap"
         endif
+
+        config RT_USING_USERHEAP
+            bool "Use user heap"
+            help
+                If this option is selected, please implement these functions:
+                    rt_malloc(), rt_malloc_sethook()
+                    rt_free(),   rt_free_sethook()
+                    rt_calloc(), rt_realloc()
+                    rt_system_heap_init()
+
+                And if FinSH is used at the same time, please implement list_mem()
+
     endchoice
 
-    if RT_USING_SMALL_MEM
-        config RT_USING_MEMTRACE
-            bool "Enable memory trace"
-            default n
-            help
-                When enable RT_USING_MEMTRACE with shell, developer can call cmd:
-                1. memtrace
-                   to dump memory block information.
-                2. memcheck
-                   to check memory block to avoid memory overwritten.
+    config RT_USING_MEMTRACE
+        bool "Enable memory trace"
+        default n
+        help
+            When enable RT_USING_MEMTRACE with shell, developer can call cmd:
+            1. memtrace
+                to dump memory block information.
+            2. memcheck
+                to check memory block to avoid memory overwritten.
 
-                And developer also can call memcheck() in each of scheduling
-                to check memory block to find which thread has wrongly modified
-                memory.
-    endif
+            And developer also can call memcheck() in each of scheduling
+            to check memory block to find which thread has wrongly modified
+            memory.
 
     config RT_USING_HEAP
         bool
@@ -294,7 +308,7 @@ menu "Memory Management"
         default y if RT_USING_SMALL_MEM
         default y if RT_USING_SLAB
         default y if RT_USING_MEMHEAP_AS_HEAP
-
+        default y if RT_USING_USERHEAP
 endmenu
 
 menu "Kernel Device Object"
@@ -331,7 +345,7 @@ endmenu
 
 config RT_VER_NUM
     hex
-    default 0x40002
+    default 0x40003
     help
         RT-Thread version number
 

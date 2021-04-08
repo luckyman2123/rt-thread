@@ -3,6 +3,8 @@ menu "Hardware Drivers Config"
 config SOC_STM32F746NG
     bool
     select SOC_SERIES_STM32F7
+    select RT_USING_COMPONENTS_INIT
+    select RT_USING_USER_MAIN
     default y
 
 menu "Onboard Peripheral Drivers"
@@ -101,7 +103,7 @@ menu "On-chip Peripheral Drivers"
         default n
         
     config BSP_USING_FMC
-        bool
+        bool "Enable Flash Memory Controller(FMC)"
         default n
 
     config BSP_USING_LTDC

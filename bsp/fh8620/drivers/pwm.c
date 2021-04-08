@@ -1,8 +1,8 @@
 /*
  *  This file is part of FH8620 BSP for RT-Thread distribution.
  *
- *	Copyright (c) 2016 Shanghai Fullhan Microelectronics Co., Ltd. 
- *	All rights reserved
+ *  Copyright (c) 2016 Shanghai Fullhan Microelectronics Co., Ltd.
+ *  All rights reserved
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *	Visit http://www.fullhan.com to get contact with Fullhan.
+ *  Visit http://www.fullhan.com to get contact with Fullhan.
  *
  * Change Logs:
  * Date           Author       Notes
@@ -29,6 +29,7 @@
 #include "interrupt.h"
 #include "board_info.h"
 #include "inc/fh_driverlib.h"
+#include <rtthread.h>
 #include <rtdevice.h>
 #ifdef FH_PWM_DEBUG
 #define PRINT_PWM_DBG(fmt, args...)     \
@@ -185,12 +186,12 @@ int fh_pwm_probe(void *priv_data)
 
     PWM_Enable(pwm_obj, RT_FALSE);
 
-    pwm_dev = rt_malloc(sizeof(struct rt_device));
-    rt_memset(pwm_dev, 0, sizeof(struct rt_device));
+    pwm_dev = rt_calloc(1,sizeof(struct rt_device));
 
     if (pwm_dev == RT_NULL)
     {
-        rt_kprintf("ERROR: %s rt_device malloc failed\n", __func__);
+        rt_kprintf("ERROR: %s rt_device calloc failed\n", __func__);
+        return -RT_ENOMEM;
     }
 
     pwm_dev->user_data = &pwm_drv;

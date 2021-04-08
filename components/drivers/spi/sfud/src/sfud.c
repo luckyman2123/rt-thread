@@ -218,7 +218,7 @@ sfud_err sfud_qspi_fast_read_enable(sfud_flash *flash, uint8_t data_line_width) 
         break;
     case 2:
         if (read_mode & DUAL_IO) {
-            qspi_set_read_cmd_format(flash, SFUD_CMD_DUAL_IO_READ_DATA, 1, 2, 8, 2);
+            qspi_set_read_cmd_format(flash, SFUD_CMD_DUAL_IO_READ_DATA, 1, 2, 4, 2);
         } else if (read_mode & DUAL_OUTPUT) {
             qspi_set_read_cmd_format(flash, SFUD_CMD_DUAL_OUTPUT_READ_DATA, 1, 1, 8, 2);
         } else {
@@ -897,7 +897,7 @@ static sfud_err set_write_enabled(const sfud_flash *flash, bool enabled) {
         if (enabled && (register_status & SFUD_STATUS_REGISTER_WEL) == 0) {
             SFUD_INFO("Error: Can't enable write status.");
             return SFUD_ERR_WRITE;
-        } else if (!enabled && (register_status & SFUD_STATUS_REGISTER_WEL) == 1) {
+        } else if (!enabled && (register_status & SFUD_STATUS_REGISTER_WEL) != 0) {
             SFUD_INFO("Error: Can't disable write status.");
             return SFUD_ERR_WRITE;
         }

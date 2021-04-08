@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -260,7 +260,8 @@ static rt_err_t rt_wlan_send_to_thread(rt_wlan_event_t event, void *buff, int le
     msg->event = event;
     if (len != 0)
     {
-        msg->buff = ((char *)msg) + sizeof(struct rt_wlan_msg);
+        msg->buff = (void *)&msg[1];
+        rt_memcpy(msg->buff, buff, len);
         msg->len = len;
     }
 
@@ -712,7 +713,7 @@ static void rt_wlan_event_dispatch(struct rt_wlan_device *device, rt_wlan_dev_ev
     }
     COMPLETE_UNLOCK();
 #ifdef RT_WLAN_WORK_THREAD_ENABLE
-    rt_wlan_send_to_thread(user_event, RT_NULL, 0);
+    rt_wlan_send_to_thread(user_event, user_buff.data, user_buff.len);
 #else
     {
         void *user_parameter;

@@ -80,6 +80,22 @@
 #define LWIP_DHCP   1
 #include <lwip/dhcp.h>
 
+#ifndef DHCP_CLIENT_PORT
+#define DHCP_CLIENT_PORT  68
+#endif
+
+#ifndef DHCP_SERVER_PORT
+#define DHCP_SERVER_PORT  67
+#endif
+
+#ifndef ETHADDR32_COPY
+#define ETHADDR32_COPY(dst, src)  SMEMCPY(dst, src, ETH_HWADDR_LEN)
+#endif
+
+#ifndef ETHADDR16_COPY
+#define ETHADDR16_COPY(dst, src)  SMEMCPY(dst, src, ETH_HWADDR_LEN)
+#endif
+
 /* buffer size for receive DHCP packet */
 #define BUFSZ               1024
 
@@ -279,6 +295,7 @@ static void dhcpd_thread_entry(void *parameter)
     {
         /* bind failed. */
         DEBUG_PRINTF("bind server address failed, errno=%d\n", errno);
+        closesocket(sock);
         rt_free(recv_data);
         return;
     }
@@ -290,7 +307,13 @@ static void dhcpd_thread_entry(void *parameter)
     {
         bytes_read = recvfrom(sock, recv_data, BUFSZ - 1, 0,
                               (struct sockaddr *)&client_addr, &addr_len);
-        if (bytes_read < DHCP_MSG_LEN)
+        if (bytes_read <= 0)
+        {
+            closesocket(sock);
+            rt_free(recv_data);
+            return;
+        }
+        else if (bytes_read < DHCP_MSG_LEN)
         {
             DEBUG_PRINTF("packet too short, wait for next!\n");
             continue;
@@ -546,4 +569,3 @@ void dhcpd_start(const char *netif_name)
         rt_thread_startup(thread);
     }
 }
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-#define AT_SW_VERSION                  "1.3.0"
+#define AT_SW_VERSION                  "1.3.1"
 
 #define AT_CMD_NAME_LEN                16
 #define AT_END_MARK_LEN                4
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 #define AT_CMD_EXPORT(_name_, _args_expr_, _test_, _query_, _setup_, _exec_)   \
-    RT_USED static const struct at_cmd __at_cmd_##_test_##_query_##_setup_##_exec_ SECTION("RtAtCmdTab") = \
+    RT_USED static const struct at_cmd __at_cmd_##_test_##_query_##_setup_##_exec_ RT_SECTION("RtAtCmdTab") = \
     {                                                                          \
         _name_,                                                                \
         _args_expr_,                                                           \
@@ -96,7 +96,7 @@ struct at_server
     rt_device_t device;
 
     at_status_t status;
-    char (*get_char)(void);
+    rt_err_t (*get_char)(struct at_server *server, char *ch, rt_int32_t timeout);
     rt_bool_t echo_mode;
 
     char recv_buffer[AT_SERVER_RECV_BUFF_LEN];
@@ -194,6 +194,8 @@ int at_server_init(void);
 void at_server_printf(const char *format, ...);
 void at_server_printfln(const char *format, ...);
 void at_server_print_result(at_result_t result);
+rt_size_t at_server_send(at_server_t server, const char *buf, rt_size_t size);
+rt_size_t at_server_recv(at_server_t server, char *buf, rt_size_t size, rt_int32_t timeout);
 
 /* AT server request arguments parse */
 int at_req_parse_args(const char *req_args, const char *req_expr, ...);

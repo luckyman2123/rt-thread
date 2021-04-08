@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -90,6 +90,8 @@ int dfs_unmount(const char *specialfile);
 
 int dfs_mkfs(const char *fs_name, const char *device_name);
 int dfs_statfs(const char *path, struct statfs *buffer);
+int dfs_mount_device(rt_device_t dev);
+int dfs_unmount_device(rt_device_t dev);
 
 #ifdef __cplusplus
 }

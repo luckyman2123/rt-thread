@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 #ifndef RT_CPU_CACHE_LINE_SZ
-#define RT_CPU_CACHE_LINE_SZ	32
+#define RT_CPU_CACHE_LINE_SZ    32
 #endif
 
 enum RT_HW_CACHE_OPS
@@ -143,6 +143,12 @@ typedef union {
     } tickets;
 } rt_hw_spinlock_t;
 
+struct rt_spinlock
+{
+    rt_hw_spinlock_t lock;
+};
+
+void rt_hw_spin_lock_init(rt_hw_spinlock_t *lock);
 void rt_hw_spin_lock(rt_hw_spinlock_t *lock);
 void rt_hw_spin_unlock(rt_hw_spinlock_t *lock);
 
@@ -175,7 +181,7 @@ void rt_hw_secondary_cpu_up(void);
 void rt_hw_secondary_cpu_idle_exec(void);
 #else
 
-#define RT_DEFINE_SPINLOCK(x)  
+#define RT_DEFINE_SPINLOCK(x)
 #define RT_DECLARE_SPINLOCK(x)    rt_ubase_t x
 
 #define rt_hw_spin_lock(lock)     *(lock) = rt_hw_interrupt_disable()

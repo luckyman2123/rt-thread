@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2019, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -79,8 +79,8 @@ struct netdev_ops;
 /* network interface device object */
 struct netdev
 {
-    rt_slist_t list; 
-    
+    rt_slist_t list;
+
     char name[RT_NAME_MAX];                            /* network interface device name */
     ip_addr_t ip_addr;                                 /* IP address */
     ip_addr_t netmask;                                 /* subnet mask */
@@ -91,11 +91,11 @@ struct netdev
     ip_addr_t dns_servers[NETDEV_DNS_SERVERS_NUM];     /* DNS server */
     uint8_t hwaddr_len;                                /* hardware address length */
     uint8_t hwaddr[NETDEV_HWADDR_MAX_LEN];             /* hardware address */
-    
+
     uint16_t flags;                                    /* network interface device status flag */
     uint16_t mtu;                                      /* maximum transfer unit (in bytes) */
     const struct netdev_ops *ops;                      /* network interface device operations */
-    
+
     netdev_callback_fn status_callback;                /* network interface device flags change callback */
     netdev_callback_fn addr_callback;                  /* network interface device address information change callback */
 
@@ -137,6 +137,9 @@ struct netdev_ops
     int (*ping)(struct netdev *netdev, const char *host, size_t data_len, uint32_t timeout, struct netdev_ping_resp *ping_resp);
     void (*netstat)(struct netdev *netdev);
 #endif
+
+    /* set default network interface device in current network stack*/
+    int (*set_default)(struct netdev *netdev);
 };
 
 /* The network interface device registered and unregistered*/

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -10,6 +10,14 @@
  */
 
 #include <rtdevice.h>
+
+#define DBG_TAG               "I2C"
+#ifdef RT_I2C_DEBUG
+#define DBG_LVL               DBG_LOG
+#else
+#define DBG_LVL               DBG_INFO
+#endif
+#include <rtdbg.h>
 
 static rt_size_t i2c_bus_device_read(rt_device_t dev,
                                      rt_off_t    pos,
@@ -23,7 +31,7 @@ static rt_size_t i2c_bus_device_read(rt_device_t dev,
     RT_ASSERT(bus != RT_NULL);
     RT_ASSERT(buffer != RT_NULL);
 
-    i2c_dbg("I2C bus dev [%s] reading %u bytes.\n", dev->parent.name, count);
+    LOG_D("I2C bus dev [%s] reading %u bytes.", dev->parent.name, count);
 
     addr = pos & 0xffff;
     flags = (pos >> 16) & 0xffff;
@@ -43,7 +51,7 @@ static rt_size_t i2c_bus_device_write(rt_device_t dev,
     RT_ASSERT(bus != RT_NULL);
     RT_ASSERT(buffer != RT_NULL);
 
-    i2c_dbg("I2C bus dev [%s] writing %u bytes.\n", dev->parent.name, count);
+    LOG_D("I2C bus dev [%s] writing %u bytes.", dev->parent.name, count);
 
     addr = pos & 0xffff;
     flags = (pos >> 16) & 0xffff;
@@ -89,9 +97,9 @@ static rt_err_t i2c_bus_device_control(rt_device_t dev,
 }
 
 #ifdef RT_USING_DEVICE_OPS
-const static struct rt_device_ops i2c_ops = 
+const static struct rt_device_ops i2c_ops =
 {
-    RT_NULL, 
+    RT_NULL,
     RT_NULL,
     RT_NULL,
     i2c_bus_device_read,

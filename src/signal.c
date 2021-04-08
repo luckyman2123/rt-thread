@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2018, RT-Thread Development Team
+ * Copyright (c) 2006-2021, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,8 +22,8 @@
 #define RT_SIG_INFO_MAX 32
 #endif
 
-#define DBG_TAG    "SIGN"
-#define DBG_LVL           DBG_WARNING
+#define DBG_TAG     "SIGN"
+#define DBG_LVL     DBG_WARNING
 #include <rtdbg.h>
 
 #define sig_mask(sig_no)    (1u << sig_no)
